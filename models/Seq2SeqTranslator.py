@@ -155,7 +155,6 @@ class Seq2Seq(nn.Module):
 
         word_rep, sentence_rep = self.encoder(src, src_lens)
         hidden = self.enc2dec(sentence_rep)
-        hidden = hidden.unsqueeze(0)
 
         for t in range(max_len):
             hidden, output, attn_weights = self.decoder(input_words, hidden, word_rep)
@@ -175,7 +174,6 @@ class Seq2Seq(nn.Module):
 
         word_rep, sentence_rep = self.encoder(src, src_lens)
         hidden = self.enc2dec(sentence_rep)
-        hidden = hidden.unsqueeze(0)
 
         for t in range(trg.shape[1]):
             input_word = trg[:, t]
