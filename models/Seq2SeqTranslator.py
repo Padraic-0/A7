@@ -108,7 +108,7 @@ class Decoder(nn.Module):
         
         embeded = self.embedding(input)
         droped = self.dropout(embeded)
-
+        print(f"Hidden shape before GRU: {hidden.shape}")
         output, hidden = self.gru(droped, hidden.unsqueeze(0))
         attended, alphas = self.attention(hidden.squeeze(0), encoder_outputs)
 
