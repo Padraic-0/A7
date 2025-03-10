@@ -76,13 +76,12 @@ class BidirectionalEncoder(nn.Module):
         droped = self.dropout(embeded)
         output, hn = self.gru(droped)
 
-        output = output.view(output.shape[0], output.shape[1], 2, self.enc_hid_dim)
-        forward_output = output[:, :, 0, :]
-        backward_output = output[:, :, 1, :]
+        forward_output = output[:, :, :, :self.enc_hid_dim]
+        backward_output = output[:, :, :, self.enc_hid_dim:]
 
         word_representations = torch.cat((forward_output, backward_output), dim=2)
 
-        batch = torch.arange(output.shape[0])
+        batch = torch.arange(output.shape[0]).to(src.device)
         last_forward = forward_output[batch, src_lens - 1]
         first_back = backward_output[:, 0, :]
 
@@ -109,9 +108,8 @@ class Decoder(nn.Module):
         
         embeded = self.embedding(input)
         droped = self.dropout(embeded)
-        hidden = hidden.unsqueeze(0)
 
-        output, hidden = self.gru(droped, hidden)
+        output, hidden = self.gru(droped, hidden.unsqueeze(0))
         attended, alphas = self.attention(hidden.squeeze(0), encoder_outputs)
 
         output = output.squeeze(1)
