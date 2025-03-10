@@ -76,8 +76,8 @@ class BidirectionalEncoder(nn.Module):
         droped = self.dropout(embeded)
         output, hn = self.gru(droped)
 
-        forward_output = output[:, :, :, :self.enc_hid_dim]
-        backward_output = output[:, :, :, self.enc_hid_dim:]
+        forward_output = output[:, :, :self.enc_hid_dim]
+        backward_output = output[:, :, self.enc_hid_dim:]
 
         word_representations = torch.cat((forward_output, backward_output), dim=2)
 
