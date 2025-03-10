@@ -106,12 +106,11 @@ class Decoder(nn.Module):
 
     def forward(self, input, hidden, encoder_outputs):
         print(f"Input shape: {input.shape}")
-        input = input.unsqueeze(1)
         embeded = self.embedding(input)
         droped = self.dropout(embeded)
         print(f"Hidden shape before GRU: {hidden.shape}")
         print(f"Dropout output shape: {droped.shape}")
-        output, hidden = self.gru(droped, hidden.unsqueeze(0))
+        output, hidden = self.gru(droped.unsqueeze(0), hidden.unsqueeze(0))
         attended, alphas = self.attention(hidden.squeeze(0), encoder_outputs)
 
         output = output.squeeze(1)
@@ -156,6 +155,7 @@ class Seq2Seq(nn.Module):
 
         word_rep, sentence_rep = self.encoder(src, src_lens)
         hidden = self.enc2dec(sentence_rep)
+        hidden = hidden.unsqueeze(0)
 
         for t in range(max_len):
             hidden, output, attn_weights = self.decoder(input_words, hidden, word_rep)
@@ -175,6 +175,7 @@ class Seq2Seq(nn.Module):
 
         word_rep, sentence_rep = self.encoder(src, src_lens)
         hidden = self.enc2dec(sentence_rep)
+        hidden = hidden.unsqueeze(0)
 
         for t in range(trg.shape[1]):
             input_word = trg[:, t]
