@@ -109,7 +109,6 @@ class Decoder(nn.Module):
         
         embeded = self.embedding(input)
         droped = self.dropout(embeded)
-        droped = droped.unsqueeze(1)
 
         output, hidden = self.gru(droped, hidden.unsqueeze(0))
         attended, alphas = self.attention(hidden.squeeze(0), encoder_outputs)
@@ -120,8 +119,6 @@ class Decoder(nn.Module):
         out = self.dec_linear(hs)
         out = self.gelu(out)
         out = self.trg_linear(out)
-
-        hidden = hidden.squeeze(0)
 
         return hidden, out, alphas
 
