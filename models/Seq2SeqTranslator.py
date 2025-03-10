@@ -156,7 +156,7 @@ class Seq2Seq(nn.Module):
         # get <SOS> inputs
         input_words = torch.ones(src.shape[0], dtype=torch.long, device=src.device)*sos_id
 
-        word_rep, sentence_rep = self.encoder(src)
+        word_rep, sentence_rep = self.encoder(src, src_lens)
         hidden = self.enc2dec(sentence_rep)
 
         for t in range(max_len):
@@ -175,7 +175,7 @@ class Seq2Seq(nn.Module):
         #tensor to store decoder outputs
         outputs = torch.zeros(trg.shape[0], trg.shape[1], self.trg_vocab_size).to(src.device)
 
-        word_rep, sentence_rep = self.encoder(src)
+        word_rep, sentence_rep = self.encoder(src, src_lens)
         hidden = self.enc2dec(sentence_rep)
 
         for t in range(trg.shape[1]):
