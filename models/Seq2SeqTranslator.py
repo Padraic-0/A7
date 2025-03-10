@@ -109,6 +109,7 @@ class Decoder(nn.Module):
         
         embeded = self.embedding(input)
         droped = self.dropout(embeded)
+        hidden = hidden.unsqueeze(0)
 
         output, hidden = self.gru(droped, hidden)
         attended, alphas = self.attention(hidden.squeeze(0), encoder_outputs)
