@@ -86,7 +86,8 @@ class BidirectionalEncoder(nn.Module):
         first_back = backward_output[:, 0, :]
 
         sentence_rep = torch.cat((last_forward, first_back), dim=1)
-
+        print(f"word rep shape: {word_representations.shape}")
+        print(f"sentence rep shape: {sentence_rep.shape}")
         return word_representations, sentence_rep
 
 
@@ -106,8 +107,7 @@ class Decoder(nn.Module):
 
     def forward(self, input, hidden, encoder_outputs):
         print(f"Input shape: {input.shape}")
-        embeded = self.embedding(input)
-        droped = self.dropout(embeded)
+        droped = self.dropout(self.embedding(input))
         print(f"Hidden shape before GRU: {hidden.shape}")
         print(f"Dropout output shape: {droped.shape}")
         output, hidden = self.gru(droped.unsqueeze(0), hidden.unsqueeze(0))
