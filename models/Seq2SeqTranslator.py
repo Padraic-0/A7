@@ -180,7 +180,7 @@ class Seq2Seq(nn.Module):
 
         for t in range(trg.shape[1]):
             input_word = trg[:, t]
-            output, hidden, _ = self.decoder(input_word, hidden, word_rep)
+            hidden, output, _ = self.decoder(input_word, hidden, word_rep)
             outputs[:, t, :] = output
 
         return outputs
