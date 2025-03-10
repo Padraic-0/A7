@@ -218,4 +218,5 @@ def generateRunName():
   run_name = ""+random_string+"_Multi30k"
   return run_name
 
-main()
+if __name__== "__main__":
+    main()

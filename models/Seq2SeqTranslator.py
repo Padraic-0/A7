@@ -9,13 +9,30 @@ class DotProductAttention(nn.Module):
     def __init__(self, q_input_dim, cand_input_dim, v_dim, kq_dim=64):
         super().__init__()
         
-        # TODO
+        self.l1 = nn.Linear(in_features=q_input_dim, out_features=kq_dim)
+        self.l2 = nn.Linear(in_features=cand_input_dim, out_features=kq_dim)
+        self.l3 = nn.Linear(in_features=cand_input_dim, out_features=v_dim)
+
+        self.kq_dim = kq_dim
 
 
     def forward(self, hidden, encoder_outputs):
         
-        # TODO
+        t1 = self.l1(hidden)
+        t2 = self.l2(encoder_outputs)
+        t3 = self.l3(encoder_outputs)
+        
+        t1 = t1.unsqueeze(1)
 
+        scores = torch.bmm(t1, t2.transpose(1,2))
+        scores = scores / (self.kq_dim ** 0.5)
+
+        alpha = torch.softmax(scores, dim=-1)
+
+        attended_val = torch.bmm(alpha, t3)
+        attended_val = attended_val.squeeze(1)
+
+        alpha = alpha.squeeze(1)
         return attended_val, alpha
 
 
@@ -48,12 +65,28 @@ class MeanPool(nn.Module):
 class BidirectionalEncoder(nn.Module):
     def __init__(self, src_vocab_len, emb_dim, enc_hid_dim, dropout=0.5):
         super().__init__()
-
-        # TODO
+        self.enc_hid_dim = enc_hid_dim
+        self.embedding = nn.Embedding(num_embeddings=src_vocab_len, embedding_dim=emb_dim)
+        self.gru = nn.GRU(input_size=emb_dim, hidden_size=enc_hid_dim, bidirectional=True, batch_first=True)
+        self.dropout = nn.Dropout(p=dropout)
 
     def forward(self, src, src_lens):
         
-        # TODO
+        embeded = self.embedding(src)
+        droped = self.dropout(embeded)
+        output, hn = self.gru(droped)
+
+        output = output.view(output.shape[0], output.shape[1], 2, self.enc_hid_dim)
+        forward_output = output[:, :, 0, :]
+        backward_output = output[:, :, 1, :]
+
+        word_representations = torch.cat((forward_output, backward_output), dim=2)
+
+        batch = torch.arange(output.shape[0])
+        last_forward = forward_output[batch, src_lens - 1]
+        first_back = backward_output[:, 0, :]
+
+        sentence_rep = torch.cat((last_forward, first_back), dim=1)
 
         return word_representations, sentence_rep
 
@@ -63,12 +96,32 @@ class Decoder(nn.Module):
         super().__init__()
 
         self.attention = attention
+        self.embedding = nn.Embedding(num_embeddings=trg_vocab_len, embedding_dim=emb_dim)
+        self.dropout = nn.Dropout(p=dropout)
+        self.gru = nn.GRU(input_size=emb_dim, hidden_size=dec_hid_dim, bidirectional=False, batch_first=True)
+        self.dec_linear = nn.Linear(in_features=dec_hid_dim, out_features=dec_hid_dim)
+        self.gelu = nn.GELU()
+        self.trg_linear = nn.Linear(in_features=dec_hid_dim, out_features=trg_vocab_len)
 
-        # TODO
+
 
     def forward(self, input, hidden, encoder_outputs):
         
-        # TODO
+        embeded = self.embedding(input)
+        droped = self.dropout(embeded)
+        droped = droped.unsqueeze(1)
+
+        output, hidden = self.gru(droped, hidden.unsqueeze(0))
+        attended, alphas = self.attention(hidden.squeeze(0), encoder_outputs)
+
+        output = output.squeeze(1)
+        hs = output + attended
+
+        out = self.dec_linear(hs)
+        out = self.gelu(out)
+        out = self.trg_linear(out)
+
+        hidden = hidden.squeeze(0)
 
         return hidden, out, alphas
 
@@ -103,7 +156,15 @@ class Seq2Seq(nn.Module):
         # get <SOS> inputs
         input_words = torch.ones(src.shape[0], dtype=torch.long, device=src.device)*sos_id
 
-        # TODO
+        word_rep, sentence_rep = self.encoder(src)
+        hidden = self.enc2dec(sentence_rep)
+
+        for t in range(max_len):
+            output, hidden, attn_weights = self.decoder(input_words, hidden, word_rep)
+            predicted_word = output.argmax(dim=1)
+            outputs[:, t] = predicted_word
+            attns[:, t, :] = attn_weights
+            input_words = predicted_word
 
         return outputs, attns
         
@@ -114,6 +175,12 @@ class Seq2Seq(nn.Module):
         #tensor to store decoder outputs
         outputs = torch.zeros(trg.shape[0], trg.shape[1], self.trg_vocab_size).to(src.device)
 
-        # TODO
+        word_rep, sentence_rep = self.encoder(src)
+        hidden = self.enc2dec(sentence_rep)
+
+        for t in range(trg.shape[1]):
+            input_word = trg[:, t]
+            output, hidden, _ = self.decoder(input_word, hidden, word_rep)
+            outputs[:, t, :] = output
 
         return outputs
