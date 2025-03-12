@@ -108,6 +108,7 @@ class Decoder(nn.Module):
     def forward(self, input, hidden, encoder_outputs):
         print(f"Input shape: {input.shape}")
         droped = self.dropout(self.embedding(input))
+        hidden = hidden.unsqueeze(0)
         print(f"Hidden shape before GRU: {hidden.shape}")
         print(f"Dropout output shape: {droped.shape}")
         output, hidden = self.gru(droped, hidden[-1])
