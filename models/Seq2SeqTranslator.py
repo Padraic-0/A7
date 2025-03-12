@@ -180,7 +180,7 @@ class Seq2Seq(nn.Module):
         # print("sentence_rep should be a Bx2*enc_hid_dim tensor", sentence_rep.shape)
         hidden = self.enc2dec(sentence_rep)
         # print("trg.shape[1]: ", trg.shape[1])
-        for t in range(1, trg.shape[1]-1):
+        for t in range(1, trg.shape[1]):
             input_word = trg[:, t-1]
             hidden, output, _ = self.decoder(input_word, hidden, word_rep)
             outputs[:, t-1, :] = output
