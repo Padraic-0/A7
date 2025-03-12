@@ -108,22 +108,22 @@ class Decoder(nn.Module):
     def forward(self, input, hidden, encoder_outputs):
         # print(f"Input shape: {input.shape}")
         droped = self.dropout(self.embedding(input))
-        hidden = hidden.unsqueeze(0)
         droped = droped.unsqueeze(1)
         # print(f"Hidden shape before GRU: {hidden.shape}")
         # print(f"Dropout output shape: {droped.shape}")
-        output, hidden = self.gru(droped, hidden)
-        output = output.squeeze(1)
-        hidden = hidden.squeeze(0)
-        attended, alphas = self.attention(hidden, encoder_outputs)
+        output, hn = self.gru(droped, hidden.unsqueeze(0))
+        
+        hn = hn.squeeze(0)
 
-        hs = hidden + attended
+        attended, alphas = self.attention(hn, encoder_outputs)
 
-        out = self.dec_linear(hs)
+        new_hidden = hn + attended
+
+        out = self.dec_linear(new_hidden)
         out = self.gelu(out)
         out = self.trg_linear(out)
 
-        return hidden, out, alphas
+        return new_hidden, out, alphas
 
 class Seq2Seq(nn.Module):
     def __init__(self, src_vocab_size, trg_vocab_size, embed_dim, enc_hidden_dim, dec_hidden_dim, kq_dim, attention, dropout=0.5):
