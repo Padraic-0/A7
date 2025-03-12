@@ -29,11 +29,11 @@ config = {
     "l2reg":0.0000001, # weight decay
     "max_epoch":50,
     "embed_dim":128,
-    "enc_dim":512,
-    "dec_dim":512,
-    "kq_dim":128,
-    "attn": "dotproduct", #Options are none, mean, dotproduct
-    "dropout":0.6
+    "enc_dim":256,
+    "dec_dim":256,
+    "kq_dim":64,
+    "attn": "none", #Options are none, mean, dotproduct
+    "dropout":0.5
 }
 
 
