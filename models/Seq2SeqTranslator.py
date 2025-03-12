@@ -74,7 +74,7 @@ class BidirectionalEncoder(nn.Module):
         
         embeded = self.embedding(src)
         droped = self.dropout(embeded)
-        output, hn = self.gru(droped)
+        output, _ = self.gru(droped)
 
         forward_output = output[:, :, :self.enc_hid_dim]
         backward_output = output[:, :, self.enc_hid_dim:]
@@ -180,7 +180,7 @@ class Seq2Seq(nn.Module):
         # print("sentence_rep should be a Bx2*enc_hid_dim tensor", sentence_rep.shape)
         hidden = self.enc2dec(sentence_rep)
         # print("trg.shape[1]: ", trg.shape[1])
-        for t in range(trg.shape[1]):
+        for t in range(1, trg.shape[1]):
             input_word = trg[:, t]
             hidden, output, _ = self.decoder(input_word, hidden, word_rep)
             outputs[:, t, :] = output
