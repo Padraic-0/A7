@@ -173,6 +173,8 @@ class Seq2Seq(nn.Module):
         outputs = torch.zeros(trg.shape[0], trg.shape[1], self.trg_vocab_size).to(src.device)
 
         word_rep, sentence_rep = self.encoder(src, src_lens)
+        print("BxTx2*enc_hid_dim tensor word_representations: ", word_rep.shape)
+        print("sentence_rep should be a Bx2*enc_hid_dim tensor", sentence_rep.shape)
         hidden = self.enc2dec(sentence_rep)
 
         for t in range(trg.shape[1]):
