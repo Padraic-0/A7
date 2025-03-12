@@ -159,7 +159,7 @@ class Seq2Seq(nn.Module):
         word_rep, sentence_rep = self.encoder(src, src_lens)
         hidden = self.enc2dec(sentence_rep)
 
-        for t in range(1, max_len):
+        for t in range(max_len):
             hidden, output, attn_weights = self.decoder(input_words, hidden, word_rep)
             predicted_word = output.argmax(dim=1)
             outputs[:, t] = predicted_word
