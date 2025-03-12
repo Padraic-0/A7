@@ -117,7 +117,7 @@ class Decoder(nn.Module):
         hidden = hidden.squeeze(0)
         attended, alphas = self.attention(hidden, encoder_outputs)
 
-        hs = output + attended
+        hs = hidden + attended
 
         out = self.dec_linear(hs)
         out = self.gelu(out)
