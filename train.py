@@ -32,8 +32,8 @@ config = {
     "enc_dim":256,
     "dec_dim":256,
     "kq_dim":64,
-    "attn": "mean", #Options are none, mean, dotproduct
-    "dropout":0.5
+    "attn": "dotproduct", #Options are none, mean, dotproduct
+    "dropout":0.0
 }
 
 
