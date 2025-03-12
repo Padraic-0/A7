@@ -114,7 +114,8 @@ class Decoder(nn.Module):
         print(f"Dropout output shape: {droped.shape}")
         output, hidden = self.gru(droped, hidden)
         output = output.squeeze(1)
-        attended, alphas = self.attention(hidden.squeeze(0), encoder_outputs)
+        hidden = hidden.squeeze(0)
+        attended, alphas = self.attention(hidden, encoder_outputs)
 
         output = output
         hs = output + attended
