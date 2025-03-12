@@ -106,18 +106,17 @@ class Decoder(nn.Module):
 
 
     def forward(self, input, hidden, encoder_outputs):
-        print(f"Input shape: {input.shape}")
+        # print(f"Input shape: {input.shape}")
         droped = self.dropout(self.embedding(input))
         hidden = hidden.unsqueeze(0)
         droped = droped.unsqueeze(1)
-        print(f"Hidden shape before GRU: {hidden.shape}")
-        print(f"Dropout output shape: {droped.shape}")
+        # print(f"Hidden shape before GRU: {hidden.shape}")
+        # print(f"Dropout output shape: {droped.shape}")
         output, hidden = self.gru(droped, hidden)
         output = output.squeeze(1)
         hidden = hidden.squeeze(0)
         attended, alphas = self.attention(hidden, encoder_outputs)
 
-        output = output
         hs = output + attended
 
         out = self.dec_linear(hs)
@@ -177,10 +176,10 @@ class Seq2Seq(nn.Module):
         outputs = torch.zeros(trg.shape[0], trg.shape[1], self.trg_vocab_size).to(src.device)
 
         word_rep, sentence_rep = self.encoder(src, src_lens)
-        print("BxTx2*enc_hid_dim tensor word_representations: ", word_rep.shape)
-        print("sentence_rep should be a Bx2*enc_hid_dim tensor", sentence_rep.shape)
+        # print("BxTx2*enc_hid_dim tensor word_representations: ", word_rep.shape)
+        # print("sentence_rep should be a Bx2*enc_hid_dim tensor", sentence_rep.shape)
         hidden = self.enc2dec(sentence_rep)
-
+        print("trg.shape[1]: ", trg.shape[1])
         for t in range(trg.shape[1]):
             input_word = trg[:, t]
             hidden, output, _ = self.decoder(input_word, hidden, word_rep)
